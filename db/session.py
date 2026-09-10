@@ -2,7 +2,7 @@ from __future__ import annotations
 
 from collections.abc import Generator
 from typing import Any
-
+import os
 from sqlalchemy import create_engine
 from sqlalchemy.engine import Engine
 from sqlalchemy.orm import Session, sessionmaker
@@ -33,6 +33,11 @@ def create_database_session(database_url: str) -> Session:
 
 
 def get_database_url() -> str:
-    import os
 
     return os.getenv("DATABASE_URL", "postgresql+psycopg2://apix_user:apix_password@localhost:5432/apix")
+
+def get_session():
+    return create_database_session(get_database_url())
+
+
+get_database_session = get_session

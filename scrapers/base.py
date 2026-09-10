@@ -29,13 +29,26 @@ class RateLimiter:
         self.last_request_at = time.monotonic()
 
 
-def check_robots_allowed(target_url: str, user_agent: str = "*") -> bool:
-    """Check robots.txt before scraping. This is a hard ethical safeguard."""
+def check_robots_allowed(target_url: str, user_agent: str = "*", timeout_seconds: int = 5) -> bool:
+    """Check robots.txt before scraping. This is a hard ethical safeguard with timeout protection."""
     robots_url = urljoin(target_url.rstrip("/") + "/", "robots.txt")
     parser = RobotFileParser()
     parser.set_url(robots_url)
     try:
-        parser.read()
+        resp = requests.get(
+            robots_url,
+            timeout=timeout_seconds,
+            headers={"User-Agent": user_agent if user_agent != "*" else "APIx-Scraper/1.0"}
+        )
+        if resp.status_code == 200:
+            parser.parse(resp.text.splitlines())
+        elif resp.status_code in (401, 403):
+            raise RobotsPolicyError(f"robots.txt HTTP {resp.status_code} denies access on {target_url}")
+        else:
+            # 404 or other non-200: standard behavior allows scraping if no robots.txt exists
+            return True
+    except RobotsPolicyError:
+        raise
     except Exception as exc:  # pragma: no cover - network failures happen in live scraping.
         raise RobotsPolicyError(f"Unable to fetch robots.txt for {target_url}: {exc}") from exc
 

@@ -1,0 +1,94 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    --bg-canvas: #060A13;
+    --bg-panel: #0B132B;
+    --bg-card: #101B39;
+    --border-subtle: #1B2A4A;
+    --border-light: #2A3F6D;
+    --text-primary: #F8FAFC;
+    --text-secondary: #94A3B8;
+    --text-muted: #64748B;
+  }
+
+  body {
+    background-color: #060A13;
+    color: #F8FAFC;
+    font-family: 'Inter', system-ui, -apple-system, sans-serif;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    overflow-x: hidden;
+  }
+}
+
+@layer utilities {
+  .tabular-nums {
+    font-variant-numeric: tabular-nums;
+  }
+  
+  /* Command Center Panel Surface */
+  .cmd-panel {
+    background-color: #0B132B;
+    border: 1px solid #1B2A4A;
+    border-radius: 0.5rem;
+    box-shadow: 0 4px 12px -2px rgba(0, 0, 0, 0.5);
+    transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+  }
+
+  .cmd-panel:hover {
+    border-color: #2A3F6D;
+  }
+
+  .cmd-card {
+    background-color: #101B39;
+    border: 1px solid #1B2A4A;
+    border-radius: 0.5rem;
+    transition: all 0.15s ease-in-out;
+  }
+
+  .cmd-card:hover {
+    border-color: #3B82F6;
+    box-shadow: 0 0 12px rgba(59, 130, 246, 0.12);
+  }
+
+  /* Thin subtle top tricolor hairline: Blue -> Cyan -> Saffron -> Green */
+  .tricolor-hairline {
+    height: 2px;
+    background: linear-gradient(90deg, #2563EB 0%, #06B6D4 33%, #F59E0B 66%, #10B981 100%);
+  }
+
+  /* Micro status pulses */
+  .pulse-blue {
+    box-shadow: 0 0 8px rgba(59, 130, 246, 0.6);
+  }
+
+  .pulse-emerald {
+    box-shadow: 0 0 8px rgba(16, 185, 129, 0.6);
+  }
+
+  .pulse-saffron {
+    box-shadow: 0 0 8px rgba(245, 158, 11, 0.6);
+  }
+
+  /* Custom dark scrollbar */
+  .custom-scrollbar::-webkit-scrollbar {
+    width: 5px;
+    height: 5px;
+  }
+  
+  .custom-scrollbar::-webkit-scrollbar-track {
+    background: #060A13;
+  }
+  
+  .custom-scrollbar::-webkit-scrollbar-thumb {
+    background: #1B2A4A;
+    border-radius: 2px;
+  }
+  
+  .custom-scrollbar::-webkit-scrollbar-thumb:hover {
+    background: #3B82F6;
+  }
+}

@@ -1,0 +1,41 @@
+# Ignore sensitive files and cache
+.env
+.env.local
+*.pyc
+__pycache__/
+*.egg-info/
+.pytest_cache/
+.coverage
+htmlcov/
+dist/
+build/
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Database
+*.db
+*.sqlite
+debug_output/
+
+# Cache
+.cache/
+.streamlit/
+
+# Logs
+*.log
+logs/
+
+# Test reports
+test_results/
+
+# Node (if adding frontend)
+node_modules/

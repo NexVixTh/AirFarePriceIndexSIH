@@ -16,6 +16,8 @@
 
 The Consumer Price Index (CPI) is India's official measure of retail inflation, published monthly by MoSPI. It's built from a fixed "basket" of goods and services weighted by how much an average household spends on each — and **air travel fares** sit inside the Transport & Communication sub-group.
 
+MoSPI's official CPI data is available via the live eSankhyiki API at https://esankhyiki.mospi.gov.in, and the codebase now includes an official reference layer that calls the real API rather than a static file. The relevant comparator for airfare is the Transport & Communication sub-group, because air travel fares are directly reported in that component of the CPI basket and therefore provide the most defensible benchmark for validating a live airfare-price index against the official government series.
+
 The trouble is *how* that airfare number currently gets into the basket. It's collected periodically (essentially a snapshot), while real airfares are one of the most volatile prices in the entire economy — they change by the hour based on:
 
 - Seat inventory depletion (fewer seats left → higher price)

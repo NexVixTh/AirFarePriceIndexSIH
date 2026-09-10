@@ -1,0 +1,121 @@
+"""
+Docker compose configuration for the Airfare Price Index (APIx) system.
+
+Services:
+- postgresql: Database for fare quotes and CPI reference data
+- api: FastAPI server for accessing index data and triggering scrapes
+- dashboard: Streamlit dashboard for visualizations
+- scraper: Scheduled scraper worker (optional, can run on a separate schedule)
+"""
+
+version: '3.8'
+
+services:
+  # PostgreSQL database
+  postgres:
+    image: postgres:15-alpine
+    container_name: apix-postgres
+    environment:
+      POSTGRES_USER: apix_user
+      POSTGRES_PASSWORD: apix_password
+      POSTGRES_DB: apix
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./db/schema.sql:/docker-entrypoint-initdb.d/01-schema.sql
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U apix_user -d apix"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - apix-network
+
+  # FastAPI server
+  api:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: apix-api
+    environment:
+      DATABASE_URL: postgresql+psycopg2://apix_user:apix_password@postgres:5432/apix
+      DEFAULT_ORIGIN: DEL
+      DEFAULT_DESTINATION: BOM
+      DEFAULT_DEPARTURE_DATE: 
+      PLAYWRIGHT_HEADLESS: "true"
+      SCRAPE_TIMEOUT_SECONDS: 60
+      SCRAPE_RATE_SECONDS: 7
+    ports:
+      - "5000:5000"
+    depends_on:
+      postgres:
+        condition: service_healthy
+    volumes:
+      - ./debug_output:/app/debug_output
+    networks:
+      - apix-network
+    restart: unless-stopped
+
+  # Production React Command Center Frontend
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    container_name: apix-frontend
+    ports:
+      - "80:80"
+      - "5173:80"
+    depends_on:
+      api:
+        condition: service_started
+    networks:
+      - apix-network
+    restart: unless-stopped
+
+  # Streamlit dashboard (Legacy / Secondary)
+  dashboard:
+    build:
+      context: .
+      dockerfile: Dockerfile.dashboard
+    container_name: apix-dashboard
+    environment:
+      DATABASE_URL: postgresql+psycopg2://apix_user:apix_password@postgres:5432/apix
+    ports:
+      - "8501:8501"
+    depends_on:
+      postgres:
+        condition: service_healthy
+      api:
+        condition: service_started
+    networks:
+      - apix-network
+    restart: unless-stopped
+
+  # Optional: Redis cache (for future optimization)
+  redis:
+    image: redis:7-alpine
+    container_name: apix-redis
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - apix-network
+    profiles:
+      - optional
+
+volumes:
+  postgres_data:
+    driver: local
+  redis_data:
+    driver: local
+
+networks:
+  apix-network:
+    driver: bridge
